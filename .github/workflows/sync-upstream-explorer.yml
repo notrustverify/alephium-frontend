@@ -1,0 +1,99 @@
+name: Sync upstream and deploy explorer
+
+on:
+  schedule:
+    # Gate on alternating UTC days below: */2 in the day field resets at month boundaries.
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: sync-upstream-explorer
+  cancel-in-progress: false
+
+jobs:
+  interval:
+    if: github.repository == 'notrustverify/alephium-frontend'
+    runs-on: ubuntu-latest
+    permissions: {}
+    outputs:
+      check: ${{ steps.interval.outputs.check }}
+    steps:
+      - name: Check whether two days have elapsed
+        id: interval
+        shell: bash
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" != 'schedule' ]] || (( $(date -u +%s) / 86400 % 2 == 0 )); then
+            printf 'check=true\n' >> "$GITHUB_OUTPUT"
+          else
+            printf 'check=false\n' >> "$GITHUB_OUTPUT"
+          fi
+
+  sync-upstream:
+    needs: interval
+    if: needs.interval.outputs.check == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      VITE_BACKEND_URL: https://backend.mainnet.alephium.org
+      VITE_NETWORK_TYPE: mainnet
+      VITE_NODE_URL: https://node.mainnet.alephium.org
+      EXPLORER_BASE_PATH: /
+    steps:
+      - name: Check out the fork
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+
+      - name: Test upstream merge behavior
+        run: node --test .github/scripts/merge-upstream.test.cjs
+
+      - name: Merge upstream while preserving fork changes
+        id: upstream
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          bash .github/scripts/merge-upstream.sh
+
+      - name: Setup pnpm
+        if: steps.upstream.outputs.changed == 'true'
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+
+      - name: Setup Node
+        if: steps.upstream.outputs.changed == 'true'
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version-file: apps/explorer/.nvmrc
+          cache: pnpm
+
+      - name: Install explorer dependencies
+        if: steps.upstream.outputs.changed == 'true'
+        run: pnpm install --filter @alephium/explorer... --filter alephium-frontend --frozen-lockfile --config.node-linker=isolated
+
+      - name: Validate the merged explorer
+        if: steps.upstream.outputs.changed == 'true'
+        run: |
+          pnpm --filter @alephium/explorer lint
+          pnpm --filter @alephium/explorer test
+          pnpm --filter @alephium/explorer run build:gh-pages
+
+      - name: Push the validated merge
+        if: steps.upstream.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.UPSTREAM_SYNC_TOKEN || github.token }}
+        run: |
+          gh auth setup-git --hostname github.com
+          git push origin "HEAD:refs/heads/$DEFAULT_BRANCH"
+
+      - name: Deploy the updated explorer
+        if: steps.upstream.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages-explorer.yml --repo "$GITHUB_REPOSITORY" --ref "$DEFAULT_BRANCH"

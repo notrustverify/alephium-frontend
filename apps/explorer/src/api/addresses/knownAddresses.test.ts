@@ -28,8 +28,8 @@ it('reads names from the address-keyed registry and reuses a single cached reque
   const names = await queryClient.fetchQuery(knownAddressesQuery)
   await queryClient.fetchQuery(knownAddressesQuery)
 
-  expect(names.address1).toBe('cgs')
-  expect(names.address2).toBe('Sesame wallet')
+  expect(names.address1?.name).toBe('cgs')
+  expect(names.address2?.name).toBe('Sesame wallet')
   expect(names.unknownAddress).toBeUndefined()
   expect(fetchMock).toHaveBeenCalledTimes(1)
   expect(fetchMock.mock.calls[0][0]).toBe(
@@ -50,7 +50,26 @@ it('ignores empty or malformed entries without losing valid names', async () => 
     )
   )
 
-  expect(await queryClient.fetchQuery(knownAddressesQuery)).toEqual({ valid: 'Pool' })
+  expect(await queryClient.fetchQuery(knownAddressesQuery)).toEqual({ valid: { name: 'Pool' } })
+})
+
+it('reads only name and type, ignoring exchange identifiers when the name field is empty', async () => {
+  fetchMock.mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        exchange: { name: '', exchangename: ' gateio ', type: '' },
+        namedExchange: { name: ' Gate.io ', exchangename: 'gateio', type: ' Exchange ' },
+        pool: { name: 'Metapool.tech', type: 'Pool' },
+        categoryOnly: { type: 'Miner' }
+      })
+    )
+  )
+
+  expect(await queryClient.fetchQuery(knownAddressesQuery)).toEqual({
+    namedExchange: { name: 'Gate.io', tag: 'Exchange' },
+    pool: { name: 'Metapool.tech', tag: 'Pool' },
+    categoryOnly: { tag: 'Miner' }
+  })
 })
 
 it.each([null, [], 'invalid'])('rejects an invalid registry: %j', async (data) => {

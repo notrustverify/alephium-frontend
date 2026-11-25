@@ -4,11 +4,13 @@ import styled from 'styled-components'
 
 import Ellipsed from '@/components/Ellipsed'
 
+import AddressTag from './AddressTag'
 import ClipboardButton from './Buttons/ClipboardButton'
 
 interface HashEllipsedProps extends HTMLAttributes<HTMLDivElement> {
   hash: string
   label?: string
+  tag?: string
   copyTooltipText?: string
   disableCopy?: boolean
   className?: string
@@ -17,6 +19,7 @@ interface HashEllipsedProps extends HTMLAttributes<HTMLDivElement> {
 const HashEllipsed = ({
   hash,
   label,
+  tag,
   copyTooltipText,
   disableCopy = false,
   className,
@@ -27,12 +30,17 @@ const HashEllipsed = ({
   return (
     <Container className={className} title={label ? hash : undefined} $hasLabel={!!label}>
       <HashContainer>
-        {label ? (
-          <NamedHash data-tooltip-id="default" data-tooltip-content={`${label} · ${hash}`} {...props}>
-            <WalletName>{label}</WalletName>
-            <SecondaryHash>
-              {hash.slice(0, 6)}…{hash.slice(-6)}
-            </SecondaryHash>
+        {label || tag ? (
+          <NamedHash data-tooltip-id="default" data-tooltip-content={`${label || tag} · ${hash}`} {...props}>
+            <WalletIdentity>
+              <WalletName>{label || hash}</WalletName>
+              {tag && <AddressTag label={tag} compact />}
+            </WalletIdentity>
+            {label && (
+              <SecondaryHash>
+                {hash.slice(0, 6)}…{hash.slice(-6)}
+              </SecondaryHash>
+            )}
           </NamedHash>
         ) : (
           <Ellipsed text={hash} {...props} />
@@ -68,16 +76,25 @@ const NamedHash = styled.div`
   line-height: 1.5;
   max-height: 1.5em;
   overflow: hidden;
-  align-items: baseline;
+  align-items: center;
 `
 
 const WalletName = styled.span`
-  flex-shrink: 0;
+  min-width: 0;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 600;
+`
+
+const WalletIdentity = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  max-width: 100%;
+  min-width: 0;
 `
 
 const SecondaryHash = styled.span`

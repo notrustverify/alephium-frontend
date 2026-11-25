@@ -8,9 +8,16 @@ const KNOWN_ADDRESSES_URL =
 
 export const KNOWN_ADDRESSES_LIST_URL = 'https://github.com/sven-hash/address2name/blob/main/know-walletsv2.json'
 
+interface KnownAddress {
+  name?: string
+  tag?: string
+}
+
+const readText = (value: unknown) => (typeof value === 'string' ? value.trim() : '')
+
 export const knownAddressesQuery = queryOptions({
-  queryKey: ['knownAddresses', KNOWN_ADDRESSES_URL],
-  queryFn: async ({ signal }): Promise<Record<string, string>> => {
+  queryKey: ['knownAddresses', KNOWN_ADDRESSES_URL, 3],
+  queryFn: async ({ signal }): Promise<Record<string, KnownAddress>> => {
     const response = await fetch(KNOWN_ADDRESSES_URL, { signal })
 
     if (!response.ok) throw new Error('Failed to fetch known addresses')
@@ -22,11 +29,14 @@ export const knownAddressesQuery = queryOptions({
     }
 
     return Object.fromEntries(
-      Object.entries(data).flatMap(([address, entry]) =>
-        entry && typeof entry === 'object' && 'name' in entry && typeof entry.name === 'string' && entry.name.trim()
-          ? [[address, entry.name.trim()]]
-          : []
-      )
+      Object.entries(data).flatMap(([address, entry]) => {
+        if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return []
+
+        const name = 'name' in entry ? readText(entry.name) : ''
+        const tag = 'type' in entry ? readText(entry.type) : ''
+
+        return name || tag ? [[address, { name: name || undefined, tag: tag || undefined }]] : []
+      })
     )
   },
   staleTime: ONE_HOUR_MS,
@@ -40,10 +50,10 @@ export const useKnownAddress = (address: string) => {
     enabled: client.networkType === 'mainnet'
   })
 
-  const name = client.networkType === 'mainnet' ? data?.[address] : undefined
+  const knownAddress = client.networkType === 'mainnet' ? data?.[address] : undefined
 
   return {
-    name,
-    isUnnamed: client.networkType === 'mainnet' && isSuccess && !name
+    ...knownAddress,
+    isUnnamed: client.networkType === 'mainnet' && isSuccess && !knownAddress?.name
   }
 }

@@ -1,11 +1,13 @@
 import styled from 'styled-components'
 
+import AddressTag from './AddressTag'
 import ClipboardButton from './Buttons/ClipboardButton'
 import TextMiddleEllipsis from './TextMiddleEllipsis'
 
 interface HighlightedHashProps {
   text: string
   label?: string
+  tag?: string
   textToCopy?: string
   middleEllipsis?: boolean
   fontSize?: number
@@ -16,6 +18,7 @@ interface HighlightedHashProps {
 const HighlightedHash = ({
   text,
   label,
+  tag,
   textToCopy,
   middleEllipsis = false,
   fontSize = 15,
@@ -27,7 +30,10 @@ const HighlightedHash = ({
   if (label) {
     return (
       <NamedAddress style={{ fontSize, maxWidth }} className={className} title={text}>
-        <HighlightedPart>{label}</HighlightedPart>
+        <WalletIdentity>
+          <HighlightedPart>{label}</HighlightedPart>
+          {tag && <AddressTag label={tag} />}
+        </WalletIdentity>
         <AddressDetails>
           <AddressText>{middleEllipsis ? <TextMiddleEllipsis text={text} /> : text}</AddressText>
           {textToCopy && <ClipboardButton textToCopy={textToCopy} />}
@@ -40,6 +46,7 @@ const HighlightedHash = ({
     <div style={{ fontSize, maxWidth, wordBreak: middleEllipsis ? 'initial' : 'break-all' }} className={className}>
       <HighlightedPart>{middleEllipsis ? <TextMiddleEllipsis text={baseHash} /> : baseHash}</HighlightedPart>
       {group && <GroupPart>:{group}</GroupPart>}
+      {tag && <AddressTag label={tag} />}
 
       {textToCopy && (
         <ButtonWrapper>
@@ -101,4 +108,13 @@ const AddressDetails = styled.div`
 const AddressText = styled(HighlightedPart)`
   min-width: 0;
   overflow-wrap: anywhere;
+`
+
+const WalletIdentity = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
 `

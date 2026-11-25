@@ -23,6 +23,7 @@ interface TightLinkProps extends SimpleLinkProps {
   text: string
   isHash?: boolean
   label?: string
+  tag?: string
 }
 
 export const SimpleLink = ({ children, newTab, ...props }: SimpleLinkProps) => (
@@ -31,7 +32,7 @@ export const SimpleLink = ({ children, newTab, ...props }: SimpleLinkProps) => (
   </StyledLink>
 )
 
-export const TightLink = ({ maxWidth, text, isHash, label, ...props }: TightLinkProps) => (
+export const TightLink = ({ maxWidth, text, isHash, label, tag, ...props }: TightLinkProps) => (
   <div style={{ maxWidth: maxWidth, minWidth: 0, display: 'flex', overflow: 'hidden' }}>
     <StyledLink
       {...props}
@@ -39,7 +40,7 @@ export const TightLink = ({ maxWidth, text, isHash, label, ...props }: TightLink
         e.stopPropagation()
       }}
     >
-      {isHash ? <HashEllipsed hash={text} label={label} /> : <Ellipsed text={text} />}
+      {isHash ? <HashEllipsed hash={text} label={label} tag={tag} /> : <Ellipsed text={text} />}
     </StyledLink>
   </div>
 )
@@ -64,7 +65,7 @@ const AddressLinkBase = ({
   className
 }: AddressLinkProps) => {
   const theme = useTheme()
-  const { name: addressName } = useKnownAddress(address)
+  const { name: addressName, tag } = useKnownAddress(address)
   const isLocked = lockTime && lockTime > Date.now()
 
   const assetsMetadata = useAssetsMetadata(amounts?.map((x) => x.id))
@@ -90,6 +91,7 @@ const AddressLinkBase = ({
         maxWidth={maxWidth}
         text={address}
         label={addressName}
+        tag={tag}
         isHash
       />
       {txHashRef && (

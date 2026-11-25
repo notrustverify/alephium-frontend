@@ -4,7 +4,7 @@ import { createRoot, Root } from 'react-dom/client'
 import { MemoryRouter } from 'react-router-dom'
 import { ThemeProvider } from 'styled-components'
 
-import { KNOWN_ADDRESSES_LIST_URL, knownAddressesQuery } from '@/api/addresses/knownAddresses'
+import { knownAddressesQuery } from '@/api/addresses/knownAddresses'
 import client from '@/api/client'
 import { AddressLink } from '@/components/Links'
 import AddressPageTitle from '@/pages/AddressPage/AddressPageTItle'
@@ -55,7 +55,7 @@ const renderAddress = async () => {
 }
 
 it('shows the wallet name in links and the heading while linking and copying the address', async () => {
-  queryClient.setQueryData(knownAddressesQuery.queryKey, { [address]: name })
+  queryClient.setQueryData(knownAddressesQuery.queryKey, { [address]: { name } })
   await renderAddress()
 
   const link = container.querySelector('a')
@@ -65,7 +65,7 @@ it('shows the wallet name in links and the heading while linking and copying the
   expect(container.querySelector('h2')?.textContent).toContain(address)
   expect(link?.textContent).toContain(`${address.slice(0, 6)}…${address.slice(-6)}`)
   expect(container.querySelector(`[title="${address}"]`)).not.toBeNull()
-  expect(container.querySelector(`a[href="${KNOWN_ADDRESSES_LIST_URL}"]`)).toBeNull()
+  expect(container.querySelector('button[aria-haspopup="dialog"]')).toBeNull()
 
   for (const icon of container.querySelectorAll('svg')) {
     await act(async () => icon.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true })))
@@ -82,13 +82,31 @@ it('shows the original address and a contribution link when it is not in the reg
 
   expect(container.querySelector('a')?.textContent).toContain(address)
   expect(container.querySelector('h2')?.textContent).toContain(address)
-  const contributionLink = container.querySelector(`a[href="${KNOWN_ADDRESSES_LIST_URL}"]`)
+  const contributionLink = container.querySelector('button[aria-haspopup="dialog"]')
   expect(contributionLink?.textContent).toBe('Recognize this address?')
   expect(contributionLink?.getAttribute('data-tooltip-content')).toBe(
     'Help others identify it by contributing a name on GitHub.'
   )
-  expect(contributionLink?.getAttribute('target')).toBe('_blank')
-  expect(contributionLink?.getAttribute('rel')).toContain('noopener')
+})
+
+it('shows exchange category tags alongside the label in links and the heading', async () => {
+  queryClient.setQueryData(knownAddressesQuery.queryKey, { [address]: { name: 'Gate.io', tag: 'Exchange' } })
+  await renderAddress()
+
+  expect(container.querySelector('a')?.textContent).toContain('Gate.ioExchange')
+  expect(container.querySelector('h2')?.textContent).toContain('Gate.ioExchange')
+  expect(container.querySelector('h2')?.textContent).toContain(address)
+  expect(container.querySelector('button[aria-haspopup="dialog"]')).toBeNull()
+})
+
+it('keeps the address and contribution link visible when only a category is known', async () => {
+  queryClient.setQueryData(knownAddressesQuery.queryKey, { [address]: { tag: 'Exchange' } })
+  await renderAddress()
+
+  expect(container.querySelector('a')?.textContent).toContain(address)
+  expect(container.querySelector('a')?.textContent).toContain('Exchange')
+  expect(container.querySelector('h2')?.textContent).toContain(address)
+  expect(container.querySelector('button[aria-haspopup="dialog"]')).not.toBeNull()
 })
 
 it('replaces the displayed address after the shared registry request completes', async () => {
@@ -103,7 +121,7 @@ it('replaces the displayed address after the shared registry request completes',
 
   expect(container.querySelector('a')?.textContent).toContain(address)
 
-  expect(container.querySelector(`a[href="${KNOWN_ADDRESSES_LIST_URL}"]`)).toBeNull()
+  expect(container.querySelector('button[aria-haspopup="dialog"]')).toBeNull()
 
   await act(async () => {
     resolveResponse(new Response(JSON.stringify({ [address]: { name } })))
@@ -123,12 +141,12 @@ it('keeps addresses visible when the registry request fails', async () => {
 
   expect(container.querySelector('a')?.textContent).toContain(address)
   expect(container.querySelector('h2')?.textContent).toContain(address)
-  expect(container.querySelector(`a[href="${KNOWN_ADDRESSES_LIST_URL}"]`)).toBeNull()
+  expect(container.querySelector('button[aria-haspopup="dialog"]')).toBeNull()
 })
 
 it('does not apply cached mainnet names on testnet', async () => {
   client.networkType = 'testnet'
-  queryClient.setQueryData(knownAddressesQuery.queryKey, { [address]: name })
+  queryClient.setQueryData(knownAddressesQuery.queryKey, { [address]: { name, tag: 'Exchange' } })
   const fetchMock = vi.fn()
   vi.stubGlobal('fetch', fetchMock)
   await renderAddress()
@@ -136,6 +154,7 @@ it('does not apply cached mainnet names on testnet', async () => {
   expect(container.querySelector('a')?.textContent).toContain(address)
   expect(container.querySelector('h2')?.textContent).toContain(address)
   expect(container.textContent).not.toContain(name)
-  expect(container.querySelector(`a[href="${KNOWN_ADDRESSES_LIST_URL}"]`)).toBeNull()
+  expect(container.textContent).not.toContain('Exchange')
+  expect(container.querySelector('button[aria-haspopup="dialog"]')).toBeNull()
   expect(fetchMock).not.toHaveBeenCalled()
 })

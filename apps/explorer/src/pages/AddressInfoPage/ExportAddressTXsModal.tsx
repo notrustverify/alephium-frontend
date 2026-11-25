@@ -32,7 +32,7 @@ interface ExportAddressTXsModalProps extends Omit<ModalProps, 'children'> {
 const ExportAddressTXsModal = ({ addressHash, onClose, ...props }: ExportAddressTXsModalProps) => {
   const { displaySnackbar } = useSnackbar()
   const { t } = useTranslation()
-  const { name: addressName } = useKnownAddress(addressHash)
+  const { name: addressName, tag } = useKnownAddress(addressHash)
 
   const [timePeriodValue, setTimePeriodValue] = useState<TimePeriodValue>('24h')
 
@@ -130,6 +130,7 @@ const ExportAddressTXsModal = ({ addressHash, onClose, ...props }: ExportAddress
       <HighlightedHash
         text={addressHash}
         label={addressName}
+        tag={tag}
         middleEllipsis
         maxWidth="200px"
         textToCopy={addressHash}
