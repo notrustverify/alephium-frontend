@@ -37,10 +37,13 @@ pnpm start
 ### GitHub Pages
 
 1. In your GitHub repository, open **Settings → Pages** and select **GitHub Actions** as the deployment source.
-2. Open **Actions → Deploy explorer to GitHub Pages → Run workflow**.
+2. Push the explorer changes to `main` or `master` to deploy automatically. You can also open
+   **Actions → Deploy explorer to GitHub Pages → Run workflow** to deploy manually.
 3. Open the site URL shown by the deployment when the workflow completes.
 
-The workflow builds only the explorer against the public mainnet services. It detects the Pages base path automatically
+The workflow installs the explorer's dependencies, runs its lint and tests, and builds it against the public mainnet services.
+Changes to the explorer, its shared packages, or its build configuration trigger deployment; wallet-only changes do not.
+It detects the Pages base path automatically
 and uses hash routing so address, transaction, and block links work when opened directly or refreshed.
 No AWS credentials are needed.
 
@@ -50,6 +53,7 @@ on mainnet.
 
 Names appear beside the full address in page headings and beside a shortened address in tables when space allows.
 Narrow table cells prioritize the name; the full address is available on hover and through the copy action.
+Unnamed mainnet address pages include an **Add a name** link to the GitHub list, where visitors can propose additions.
 
 To build locally for Pages, set the backend variables from `.env.example` and run `pnpm run build:gh-pages`.
 The default base path is `/explorer/`; set `EXPLORER_BASE_PATH` to override it (for example, `/alephium-frontend/` or `/`).

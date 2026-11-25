@@ -6,6 +6,8 @@ import client from '@/api/client'
 const KNOWN_ADDRESSES_URL =
   'https://raw.githubusercontent.com/sven-hash/address2name/refs/heads/main/know-walletsv2.json'
 
+export const KNOWN_ADDRESSES_LIST_URL = 'https://github.com/sven-hash/address2name/blob/main/know-walletsv2.json'
+
 export const knownAddressesQuery = queryOptions({
   queryKey: ['knownAddresses', KNOWN_ADDRESSES_URL],
   queryFn: async ({ signal }): Promise<Record<string, string>> => {
@@ -32,11 +34,16 @@ export const knownAddressesQuery = queryOptions({
   retry: 1
 })
 
-export const useAddressName = (address: string) => {
-  const { data } = useQuery({
+export const useKnownAddress = (address: string) => {
+  const { data, isSuccess } = useQuery({
     ...knownAddressesQuery,
     enabled: client.networkType === 'mainnet'
   })
 
-  return client.networkType === 'mainnet' ? data?.[address] : undefined
+  const name = client.networkType === 'mainnet' ? data?.[address] : undefined
+
+  return {
+    name,
+    isUnnamed: client.networkType === 'mainnet' && isSuccess && !name
+  }
 }

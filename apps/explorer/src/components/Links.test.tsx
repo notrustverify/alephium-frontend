@@ -4,7 +4,7 @@ import { createRoot, Root } from 'react-dom/client'
 import { MemoryRouter } from 'react-router-dom'
 import { ThemeProvider } from 'styled-components'
 
-import { knownAddressesQuery } from '@/api/addresses/knownAddresses'
+import { KNOWN_ADDRESSES_LIST_URL, knownAddressesQuery } from '@/api/addresses/knownAddresses'
 import client from '@/api/client'
 import { AddressLink } from '@/components/Links'
 import AddressPageTitle from '@/pages/AddressPage/AddressPageTItle'
@@ -65,6 +65,7 @@ it('shows the wallet name in links and the heading while linking and copying the
   expect(container.querySelector('h2')?.textContent).toContain(address)
   expect(link?.textContent).toContain(`${address.slice(0, 6)}…${address.slice(-6)}`)
   expect(container.querySelector(`[title="${address}"]`)).not.toBeNull()
+  expect(container.querySelector(`a[href="${KNOWN_ADDRESSES_LIST_URL}"]`)).toBeNull()
 
   for (const icon of container.querySelectorAll('svg')) {
     await act(async () => icon.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true })))
@@ -75,12 +76,16 @@ it('shows the wallet name in links and the heading while linking and copying the
   expect(writeText).toHaveBeenNthCalledWith(2, address)
 })
 
-it('shows the original address when it is not in the registry', async () => {
+it('shows the original address and a contribution link when it is not in the registry', async () => {
   queryClient.setQueryData(knownAddressesQuery.queryKey, {})
   await renderAddress()
 
   expect(container.querySelector('a')?.textContent).toContain(address)
   expect(container.querySelector('h2')?.textContent).toContain(address)
+  const contributionLink = container.querySelector(`a[href="${KNOWN_ADDRESSES_LIST_URL}"]`)
+  expect(contributionLink?.textContent).toBe('Add a name')
+  expect(contributionLink?.getAttribute('target')).toBe('_blank')
+  expect(contributionLink?.getAttribute('rel')).toContain('noopener')
 })
 
 it('replaces the displayed address after the shared registry request completes', async () => {
@@ -94,6 +99,8 @@ it('replaces the displayed address after the shared registry request completes',
   await renderAddress()
 
   expect(container.querySelector('a')?.textContent).toContain(address)
+
+  expect(container.querySelector(`a[href="${KNOWN_ADDRESSES_LIST_URL}"]`)).toBeNull()
 
   await act(async () => {
     resolveResponse(new Response(JSON.stringify({ [address]: { name } })))
@@ -113,6 +120,7 @@ it('keeps addresses visible when the registry request fails', async () => {
 
   expect(container.querySelector('a')?.textContent).toContain(address)
   expect(container.querySelector('h2')?.textContent).toContain(address)
+  expect(container.querySelector(`a[href="${KNOWN_ADDRESSES_LIST_URL}"]`)).toBeNull()
 })
 
 it('does not apply cached mainnet names on testnet', async () => {
@@ -125,5 +133,6 @@ it('does not apply cached mainnet names on testnet', async () => {
   expect(container.querySelector('a')?.textContent).toContain(address)
   expect(container.querySelector('h2')?.textContent).toContain(address)
   expect(container.textContent).not.toContain(name)
+  expect(container.querySelector(`a[href="${KNOWN_ADDRESSES_LIST_URL}"]`)).toBeNull()
   expect(fetchMock).not.toHaveBeenCalled()
 })

@@ -1,6 +1,20 @@
 name: Deploy explorer to GitHub Pages
 
 on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'apps/explorer/**'
+      - 'packages/shared/**'
+      - 'packages/shared-react/**'
+      - 'packages/eslint-config/**'
+      - 'packages/typescript-config/**'
+      - 'patches/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'turbo.json'
+      - '.github/workflows/deploy-pages-explorer.yml'
   workflow_dispatch:
 
 permissions:
@@ -20,6 +34,7 @@ env:
 jobs:
   deploy-pages-explorer:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -27,12 +42,28 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
 
-      - name: Setup monorepo
-        uses: ./.github/actions/setup-monorepo
+      - name: Setup pnpm
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        with:
+          version: 11.8.0
+
+      - name: Setup Node
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version: 22.14.0
+          cache: pnpm
+
+      - name: Install explorer dependencies
+        run: pnpm install --filter @alephium/explorer... --filter alephium-frontend --frozen-lockfile --config.node-linker=isolated
 
       - name: Configure GitHub Pages
         id: pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
+
+      - name: Check explorer
+        run: |
+          pnpm --filter @alephium/explorer lint
+          pnpm --filter @alephium/explorer test
 
       - name: Build explorer
         working-directory: apps/explorer

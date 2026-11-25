@@ -5,7 +5,7 @@ import { RiExternalLinkLine } from 'react-icons/ri'
 import { Link, LinkProps } from 'react-router-dom'
 import styled, { css, useTheme } from 'styled-components'
 
-import { useAddressName } from '@/api/addresses/knownAddresses'
+import { useKnownAddress } from '@/api/addresses/knownAddresses'
 import { useAssetsMetadata } from '@/api/assets/assetsHooks'
 import Amount from '@/components/Amount'
 import LockTimeIcon from '@/components/LockTimeIcon'
@@ -64,7 +64,7 @@ const AddressLinkBase = ({
   className
 }: AddressLinkProps) => {
   const theme = useTheme()
-  const addressName = useAddressName(address)
+  const { name: addressName } = useKnownAddress(address)
   const isLocked = lockTime && lockTime > Date.now()
 
   const assetsMetadata = useAssetsMetadata(amounts?.map((x) => x.id))
