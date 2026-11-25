@@ -20,6 +20,7 @@ import AddressTransactionsExportButton from '@/pages/AddressPage/AddressTransact
 import AddressWorth from '@/pages/AddressPage/AddressWorth'
 import { useAddressDataPolling } from '@/pages/AddressPage/useAddressDataPolling'
 import { deviceBreakPoints } from '@/styles/globalStyles'
+import { getAddressWithoutGroup } from '@/utils/addresses'
 
 interface AddressPageProps {
   addressStr: string
@@ -50,7 +51,12 @@ const AddressPage = ({ addressStr }: AddressPageProps) => {
             <AddressLatestActivity addressStr={addressStr} />
           </InfoGrid>
           <QRCodeCell>
-            <QRCode size={130} value={addressStr} bgColor="transparent" fgColor={theme.font.primary} />
+            <QRCode
+              size={130}
+              value={getAddressWithoutGroup(addressStr)}
+              bgColor="transparent"
+              fgColor={theme.font.primary}
+            />
           </QRCodeCell>
         </InfoGridAndQR>
 

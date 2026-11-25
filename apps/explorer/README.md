@@ -61,8 +61,9 @@ on mainnet.
 Names appear beside the full address in page headings and beside a shortened address in tables when space allows.
 Narrow table cells prioritize the name; the full address is available on hover and through the copy action.
 Unnamed mainnet address pages include a **Recognize this address?** button that opens a contribution form.
-The address and any existing category are prefilled. Visitors enter a name, an optional category, and a public
-supporting URL. The form validates the address and blocks suggestions for addresses that already have a name.
+The address and any existing category are prefilled. Visitors enter a name and can optionally add a category
+and a public supporting URL. The form validates the address and blocks suggestions for addresses that already have a name.
+Groupless addresses use the base address without a `:group` suffix for names, links, copies, and contributions.
 **Continue on GitHub** opens a prefilled issue in `sven-hash/address2name`; the visitor signs in and submits it
 on GitHub. Opening the draft does not submit the suggestion or change the registry. A maintainer reviews the
 request and updates `know-walletsv2.json` before the name can appear in the explorer. Ownership claims link

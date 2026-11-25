@@ -1,5 +1,7 @@
 import { isValidAddress } from '@alephium/web3'
 
+import { getAddressWithoutGroup } from '@/utils/addresses'
+
 export interface AddressContribution {
   address: string
   name: string
@@ -17,6 +19,7 @@ export const validateAddressContribution = (contribution: AddressContribution) =
   if (name.trim().length > contributionLimits.name) return 'Keep the name to 60 characters or fewer.'
   if (category.trim().length > contributionLimits.category) return 'Keep the category to 40 characters or fewer.'
   if (source.trim().length > contributionLimits.source) return 'Keep the source URL to 500 characters or fewer.'
+  if (!source.trim()) return
 
   try {
     const url = new URL(source.trim())
@@ -34,12 +37,14 @@ export const getAddressContributionUrl = ({ address, name, category, source }: A
     'Please review this suggestion for know-walletsv2.json.',
     '',
     '```json',
-    JSON.stringify({ address: address.trim(), name: name.trim(), type: category.trim() }, null, 2),
+    JSON.stringify(
+      { address: getAddressWithoutGroup(address.trim()), name: name.trim(), type: category.trim() },
+      null,
+      2
+    ),
     '```',
     '',
-    '## Supporting source',
-    source.trim(),
-    '',
+    ...(source.trim() ? ['## Supporting source', source.trim(), ''] : []),
     'Submitted through the Alephium explorer contribution form. This is a suggestion, not proof of ownership.'
   ].join('\n')
 

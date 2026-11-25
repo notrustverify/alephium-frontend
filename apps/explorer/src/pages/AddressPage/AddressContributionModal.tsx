@@ -12,6 +12,7 @@ import ExternalLink from '@/components/ExternalLink'
 import { AddressLink } from '@/components/Links'
 import { deviceBreakPoints } from '@/styles/globalStyles'
 import { contributionLimits, getAddressContributionUrl, validateAddressContribution } from '@/utils/addressContribution'
+import { getAddressWithoutGroup } from '@/utils/addresses'
 
 interface AddressContributionModalProps {
   initialAddress: string
@@ -24,7 +25,7 @@ const AddressContributionModal = ({ initialAddress, initialCategory = '', onClos
   const id = useId()
   const dialogRef = useRef<HTMLDialogElement>(null)
   const nameRef = useRef<HTMLInputElement>(null)
-  const [address, setAddress] = useState(initialAddress)
+  const [address, setAddress] = useState(() => getAddressWithoutGroup(initialAddress))
   const [name, setName] = useState('')
   const [category, setCategory] = useState(initialCategory)
   const [source, setSource] = useState('')
@@ -79,7 +80,7 @@ const AddressContributionModal = ({ initialAddress, initialCategory = '', onClos
           <X size={20} aria-hidden />
         </CloseButton>
         <h2 id={`${id}-title`}>{t('Help identify an address')}</h2>
-        <p id={`${id}-description`}>{t('Share a name and a public source to help others recognize this address.')}</p>
+        <p id={`${id}-description`}>{t('Suggest a name to help others recognize this address.')}</p>
       </Header>
       <Form
         action={submissionUrl.origin + submissionUrl.pathname}
@@ -98,6 +99,7 @@ const AddressContributionModal = ({ initialAddress, initialCategory = '', onClos
             id={`${id}-address`}
             value={address}
             onChange={(e) => setAddress(e.target.value)}
+            onBlur={() => setAddress(getAddressWithoutGroup(address.trim()))}
             maxLength={contributionLimits.address}
             required
             spellCheck={false}
@@ -142,7 +144,9 @@ const AddressContributionModal = ({ initialAddress, initialCategory = '', onClos
           </datalist>
         </Field>
         <Field>
-          <label htmlFor={`${id}-source`}>{t('Supporting source')}</label>
+          <label htmlFor={`${id}-source`}>
+            {t('Supporting source')} <Optional>{t('(optional)')}</Optional>
+          </label>
           <Input
             id={`${id}-source`}
             type="url"
@@ -150,7 +154,6 @@ const AddressContributionModal = ({ initialAddress, initialCategory = '', onClos
             onChange={(e) => setSource(e.target.value)}
             placeholder="https://"
             maxLength={contributionLimits.source}
-            required
             spellCheck={false}
             autoCapitalize="none"
           />

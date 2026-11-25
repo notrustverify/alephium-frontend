@@ -168,5 +168,6 @@
   "Keep the name to 60 characters or fewer.": "Keep the name to 60 characters or fewer.",
   "Keep the category to 40 characters or fewer.": "Keep the category to 40 characters or fewer.",
   "Keep the source URL to 500 characters or fewer.": "Keep the source URL to 500 characters or fewer.",
-  "Add a public http or https URL that supports this name.": "Add a public http or https URL that supports this name."
+  "Add a public http or https URL that supports this name.": "Add a public http or https URL that supports this name.",
+  "Suggest a name to help others recognize this address.": "Suggest a name to help others recognize this address."
 }

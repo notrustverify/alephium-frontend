@@ -9,6 +9,7 @@ import { useKnownAddress } from '@/api/addresses/knownAddresses'
 import { useAssetsMetadata } from '@/api/assets/assetsHooks'
 import Amount from '@/components/Amount'
 import LockTimeIcon from '@/components/LockTimeIcon'
+import { getAddressWithoutGroup } from '@/utils/addresses'
 
 import Ellipsed from './Ellipsed'
 import HashEllipsed from './HashEllipsed'
@@ -65,6 +66,7 @@ const AddressLinkBase = ({
   className
 }: AddressLinkProps) => {
   const theme = useTheme()
+  const baseAddress = getAddressWithoutGroup(address)
   const { name: addressName, tag } = useKnownAddress(address)
   const isLocked = lockTime && lockTime > Date.now()
 
@@ -87,9 +89,9 @@ const AddressLinkBase = ({
   return (
     <div className={className}>
       <TightLink
-        to={getAddressExplorerPagePath(address)}
+        to={getAddressExplorerPagePath(baseAddress)}
         maxWidth={maxWidth}
-        text={address}
+        text={baseAddress}
         label={addressName}
         tag={tag}
         isHash

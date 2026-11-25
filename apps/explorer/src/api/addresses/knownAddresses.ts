@@ -2,6 +2,7 @@ import { ONE_DAY_MS, ONE_HOUR_MS } from '@alephium/shared'
 import { queryOptions, useQuery } from '@tanstack/react-query'
 
 import client from '@/api/client'
+import { getAddressWithoutGroup } from '@/utils/addresses'
 
 const KNOWN_ADDRESSES_URL =
   'https://raw.githubusercontent.com/sven-hash/address2name/refs/heads/main/know-walletsv2.json'
@@ -50,7 +51,7 @@ export const useKnownAddress = (address: string) => {
     enabled: client.networkType === 'mainnet'
   })
 
-  const knownAddress = client.networkType === 'mainnet' ? data?.[address] : undefined
+  const knownAddress = client.networkType === 'mainnet' ? data?.[getAddressWithoutGroup(address)] : undefined
 
   return {
     ...knownAddress,

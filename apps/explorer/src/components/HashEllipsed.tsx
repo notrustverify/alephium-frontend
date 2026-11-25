@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
 import Ellipsed from '@/components/Ellipsed'
+import { getAddressWithoutGroup } from '@/utils/addresses'
 
 import AddressTag from './AddressTag'
 import ClipboardButton from './Buttons/ClipboardButton'
@@ -17,7 +18,7 @@ interface HashEllipsedProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const HashEllipsed = ({
-  hash,
+  hash: originalHash,
   label,
   tag,
   copyTooltipText,
@@ -26,6 +27,7 @@ const HashEllipsed = ({
   ...props
 }: HashEllipsedProps) => {
   const { t } = useTranslation()
+  const hash = getAddressWithoutGroup(originalHash)
 
   return (
     <Container className={className} title={label ? hash : undefined} $hasLabel={!!label}>

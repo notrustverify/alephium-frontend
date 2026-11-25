@@ -39,14 +39,14 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-const renderAddress = async () => {
+const renderAddress = async (addressStr = address) => {
   await act(async () => {
     root.render(
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={lightTheme}>
           <MemoryRouter>
-            <AddressLink address={address} />
-            <AddressPageTitle addressStr={address} />
+            <AddressLink address={addressStr} />
+            <AddressPageTitle addressStr={addressStr} />
           </MemoryRouter>
         </ThemeProvider>
       </QueryClientProvider>
@@ -74,6 +74,40 @@ it('shows the wallet name in links and the heading while linking and copying the
   expect(writeText).toHaveBeenCalledTimes(2)
   expect(writeText).toHaveBeenNthCalledWith(1, address)
   expect(writeText).toHaveBeenNthCalledWith(2, address)
+})
+
+const grouplessAddress = '3cUrwi3GByza3HdjLDH7EeLWmSuLDXBpUbBiqdBYyNo4qLWfcHzwC'
+
+it.each([0, 1, 2, 3])(
+  'uses the base groupless address for group %i names, labels, links and copying',
+  async (group) => {
+    queryClient.setQueryData(knownAddressesQuery.queryKey, { [grouplessAddress]: { name: 'Groupless wallet' } })
+    await renderAddress(`${grouplessAddress}:${group}`)
+
+    expect(container.querySelector('a')?.textContent).toContain('Groupless wallet')
+    expect(container.querySelector('a')?.getAttribute('href')).toBe(`/addresses/${grouplessAddress}`)
+    expect(container.querySelector('h2')?.textContent).toContain(`Groupless wallet${grouplessAddress}`)
+    expect(container.querySelector('h2')?.textContent).not.toContain(`${grouplessAddress}:`)
+    expect(container.querySelector('button[aria-haspopup="dialog"]')).toBeNull()
+    expect(container.querySelector('a [title]')?.getAttribute('title')).toBe(grouplessAddress)
+
+    for (const icon of container.querySelectorAll('svg')) {
+      await act(async () => icon.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true })))
+    }
+    expect(writeText).toHaveBeenCalledTimes(2)
+    expect(writeText).toHaveBeenNthCalledWith(1, grouplessAddress)
+    expect(writeText).toHaveBeenNthCalledWith(2, grouplessAddress)
+  }
+)
+
+it('omits the group suffix for unnamed groupless addresses', async () => {
+  queryClient.setQueryData(knownAddressesQuery.queryKey, {})
+  await renderAddress(`${grouplessAddress}:0`)
+
+  expect(container.querySelector('h2')?.textContent).toContain(grouplessAddress)
+  expect(container.querySelector('h2')?.textContent).not.toContain(':0')
+  expect(container.querySelector('a')?.textContent).not.toContain(':0')
+  expect(container.querySelector('a')?.getAttribute('href')).toBe(`/addresses/${grouplessAddress}`)
 })
 
 it('shows the original address and a contribution link when it is not in the registry', async () => {

@@ -31,13 +31,13 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-const renderForm = async () => {
+const renderForm = async (initialAddress = address) => {
   await act(async () =>
     root.render(
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={lightTheme}>
           <MemoryRouter>
-            <AddressContributionModal initialAddress={address} initialCategory="Exchange" onClose={vi.fn()} />
+            <AddressContributionModal initialAddress={initialAddress} initialCategory="Exchange" onClose={vi.fn()} />
           </MemoryRouter>
         </ThemeProvider>
       </QueryClientProvider>
@@ -99,4 +99,31 @@ it('blocks duplicate suggestions for an address that already has a name', async 
     container.querySelector('form')!.dispatchEvent(event)
   })
   expect(event.defaultPrevented).toBe(true)
+})
+
+it('prefills a groupless address without the group and allows submitting without a source', async () => {
+  const baseAddress = '3cUrwi3GByza3HdjLDH7EeLWmSuLDXBpUbBiqdBYyNo4qLWfcHzwC'
+  await renderForm(`${baseAddress}:2`)
+  expect(container.querySelector('input[maxlength="100"]')?.getAttribute('value')).toBe(baseAddress)
+  expect(container.querySelector('input[type="url"]')?.hasAttribute('required')).toBe(false)
+  await fill('Name', 'Community wallet')
+
+  const event = new Event('submit', { bubbles: true, cancelable: true })
+  await act(async () => {
+    container.querySelector('form')!.dispatchEvent(event)
+  })
+  expect(event.defaultPrevented).toBe(false)
+  const body = (container.querySelector('input[name="body"]') as HTMLInputElement).value
+  expect(body).not.toContain('## Supporting source')
+  expect(body).toContain(baseAddress)
+  expect(body).not.toContain(`${baseAddress}:2`)
+})
+
+it('finds an existing name for a groupless address when a group is pasted', async () => {
+  const baseAddress = '3cUrwi3GByza3HdjLDH7EeLWmSuLDXBpUbBiqdBYyNo4qLWfcHzwC'
+  queryClient.setQueryData(knownAddressesQuery.queryKey, { [baseAddress]: { name: 'Known groupless wallet' } })
+  await renderForm()
+  await fill('Address', `${baseAddress}:1`)
+  expect(container.querySelector('[role="alert"]')?.textContent).toContain('Known groupless wallet')
+  expect(container.querySelector('button[type="submit"]')?.hasAttribute('disabled')).toBe(true)
 })

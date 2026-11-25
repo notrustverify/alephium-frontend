@@ -1,5 +1,7 @@
 import styled from 'styled-components'
 
+import { getAddressWithoutGroup } from '@/utils/addresses'
+
 import AddressTag from './AddressTag'
 import ClipboardButton from './Buttons/ClipboardButton'
 import TextMiddleEllipsis from './TextMiddleEllipsis'
@@ -16,15 +18,17 @@ interface HighlightedHashProps {
 }
 
 const HighlightedHash = ({
-  text,
+  text: originalText,
   label,
   tag,
-  textToCopy,
+  textToCopy: originalTextToCopy,
   middleEllipsis = false,
   fontSize = 15,
   maxWidth = 'auto',
   className
 }: HighlightedHashProps) => {
+  const text = getAddressWithoutGroup(originalText)
+  const textToCopy = originalTextToCopy && getAddressWithoutGroup(originalTextToCopy)
   const [baseHash, group] = text.split(':')
 
   if (label) {
