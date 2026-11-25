@@ -21,8 +21,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
@@ -34,12 +32,11 @@ env:
   VITE_NODE_URL: https://node.mainnet.alephium.org
 
 jobs:
-  deploy-pages-explorer:
+  build-explorer:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    environment:
-      name: github-pages
-      url: https://frontend.alephium.notrustverify.ch
+    outputs:
+      artifact_name: github-pages-${{ github.run_attempt }}
     steps:
       - name: Check out Git repository
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
@@ -56,9 +53,6 @@ jobs:
       - name: Install explorer dependencies
         run: pnpm install --filter @alephium/explorer... --filter alephium-frontend --frozen-lockfile --config.node-linker=isolated
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
-
       - name: Check explorer
         run: |
           pnpm --filter @alephium/explorer lint
@@ -73,8 +67,27 @@ jobs:
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
+          name: github-pages-${{ github.run_attempt }}
           path: apps/explorer/build
+
+  # Give the artifact service time to publish the upload before deploy-pages lists it.
+  # https://github.com/actions/deploy-pages/issues/451
+  deploy-pages-explorer:
+    needs: build-explorer
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: https://frontend.alephium.notrustverify.ch
+    steps:
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
+        with:
+          artifact_name: ${{ needs.build-explorer.outputs.artifact_name }}

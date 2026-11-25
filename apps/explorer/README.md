@@ -46,6 +46,9 @@ pnpm start
    [frontend.alephium.notrustverify.ch](https://frontend.alephium.notrustverify.ch).
 
 The workflow installs the explorer's dependencies, runs its lint and tests, and builds it against the public mainnet services.
+The build job uploads the site, then a separate deployment job publishes it to avoid an artifact visibility race.
+Artifacts are named per build attempt so a full rerun does not create duplicate names. If only deployment fails,
+rerun the failed deployment job to reuse the existing build, or start a new workflow run if the artifact has expired.
 Changes to the explorer, its shared packages, or its build configuration trigger deployment; wallet-only changes do not.
 It builds with a root base path (`/`) for the custom domain and uses hash routing so address, transaction, and block links
 work when opened directly or refreshed.
