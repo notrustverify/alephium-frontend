@@ -3,8 +3,8 @@ import svgrPlugin from 'vite-plugin-svgr'
 import viteTsconfigPaths from 'vite-tsconfig-paths'
 import { defineConfig } from 'vitest/config'
 
-export default defineConfig(({ mode }) => ({
-  base: process.env.EXPLORER_BASE_PATH || (mode === 'github-pages' ? '/explorer/' : '/'),
+export default defineConfig({
+  base: process.env.EXPLORER_BASE_PATH || '/',
   plugins: [react(), viteTsconfigPaths(), svgrPlugin()],
   test: {
     globals: true,
@@ -19,4 +19,4 @@ export default defineConfig(({ mode }) => ({
     target: 'es2020',
     outDir: 'build'
   }
-}))
+})

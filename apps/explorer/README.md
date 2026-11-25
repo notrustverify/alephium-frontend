@@ -37,15 +37,22 @@ pnpm start
 ### GitHub Pages
 
 1. In your GitHub repository, open **Settings → Pages** and select **GitHub Actions** as the deployment source.
-2. Push the explorer changes to `main` or `master` to deploy automatically. You can also open
+2. Set **Custom domain** to `frontend.alephium.notrustverify.ch` and save it.
+3. At your DNS provider, create a `CNAME` record for `frontend.alephium.notrustverify.ch` pointing to
+   `notrustverify.github.io` (without a repository path).
+4. Push the explorer changes to `main` or `master` to deploy automatically. You can also open
    **Actions → Deploy explorer to GitHub Pages → Run workflow** to deploy manually.
-3. Open the site URL shown by the deployment when the workflow completes.
+5. Enable **Enforce HTTPS** in Pages settings when the certificate is ready, then open
+   [frontend.alephium.notrustverify.ch](https://frontend.alephium.notrustverify.ch).
 
 The workflow installs the explorer's dependencies, runs its lint and tests, and builds it against the public mainnet services.
 Changes to the explorer, its shared packages, or its build configuration trigger deployment; wallet-only changes do not.
-It detects the Pages base path automatically
-and uses hash routing so address, transaction, and block links work when opened directly or refreshed.
+It builds with a root base path (`/`) for the custom domain and uses hash routing so address, transaction, and block links
+work when opened directly or refreshed.
 No AWS credentials are needed.
+
+GitHub Actions deployments use the custom domain configured in Pages settings; a `CNAME` file in the build output is not
+required. See [GitHub's custom domain instructions](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site).
 
 Known wallet names are fetched in the browser and cached for one hour. Unlisted addresses and failed lookups display the
 original address. Links, clipboard actions, and transaction exports always use the original address. Names are only shown
@@ -57,7 +64,7 @@ Unnamed mainnet address pages include a **Recognize this address?** link to the 
 contribute a name and help others identify the address.
 
 To build locally for Pages, set the backend variables from `.env.example` and run `pnpm run build:gh-pages`.
-The default base path is `/explorer/`; set `EXPLORER_BASE_PATH` to override it (for example, `/alephium-frontend/` or `/`).
+The default base path is `/`; set `EXPLORER_BASE_PATH` to override it for a repository subpath, such as `/alephium-frontend/`.
 
 ### Docker and AWS
 
