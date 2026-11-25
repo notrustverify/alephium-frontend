@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { RiCheckLine } from 'react-icons/ri'
 import styled from 'styled-components'
 
+import { useAddressName } from '@/api/addresses/knownAddresses'
 import client from '@/api/client'
 import Button from '@/components/Buttons/Button'
 import HighlightedHash from '@/components/HighlightedHash'
@@ -31,6 +32,7 @@ interface ExportAddressTXsModalProps extends Omit<ModalProps, 'children'> {
 const ExportAddressTXsModal = ({ addressHash, onClose, ...props }: ExportAddressTXsModalProps) => {
   const { displaySnackbar } = useSnackbar()
   const { t } = useTranslation()
+  const addressName = useAddressName(addressHash)
 
   const [timePeriodValue, setTimePeriodValue] = useState<TimePeriodValue>('24h')
 
@@ -125,7 +127,13 @@ const ExportAddressTXsModal = ({ addressHash, onClose, ...props }: ExportAddress
   return (
     <Modal maxWidth={550} onClose={onClose} {...props}>
       <h2>{t('Export address transactions')}</h2>
-      <HighlightedHash text={addressHash} middleEllipsis maxWidth="200px" textToCopy={addressHash} />
+      <HighlightedHash
+        text={addressHash}
+        label={addressName}
+        middleEllipsis
+        maxWidth="200px"
+        textToCopy={addressHash}
+      />
       <Explanations>
         {t(
           'You can download the address transaction history for a selected time period. This can be useful for tax reporting.'

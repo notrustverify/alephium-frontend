@@ -2,7 +2,7 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "env": ["VITE_NETWORK_TYPE", "VITE_BACKEND_URL", "VITE_NODE_URL", "BASE_URL"],
+      "env": ["VITE_NETWORK_TYPE", "VITE_BACKEND_URL", "VITE_NODE_URL", "BASE_URL", "MODE", "EXPLORER_BASE_PATH"],
       "outputs": ["build/**"]
     },
     "start:app": {
@@ -11,7 +11,9 @@
       "persistent": true
     },
     "build:gh-pages": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "env": ["VITE_NETWORK_TYPE", "VITE_BACKEND_URL", "VITE_NODE_URL", "BASE_URL", "MODE", "EXPLORER_BASE_PATH"],
+      "outputs": ["build/**"]
     }
   }
 }

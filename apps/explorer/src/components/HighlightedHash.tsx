@@ -5,6 +5,7 @@ import TextMiddleEllipsis from './TextMiddleEllipsis'
 
 interface HighlightedHashProps {
   text: string
+  label?: string
   textToCopy?: string
   middleEllipsis?: boolean
   fontSize?: number
@@ -14,6 +15,7 @@ interface HighlightedHashProps {
 
 const HighlightedHash = ({
   text,
+  label,
   textToCopy,
   middleEllipsis = false,
   fontSize = 15,
@@ -21,6 +23,18 @@ const HighlightedHash = ({
   className
 }: HighlightedHashProps) => {
   const [baseHash, group] = text.split(':')
+
+  if (label) {
+    return (
+      <NamedAddress style={{ fontSize, maxWidth }} className={className} title={text}>
+        <HighlightedPart>{label}</HighlightedPart>
+        <AddressDetails>
+          <AddressText>{middleEllipsis ? <TextMiddleEllipsis text={text} /> : text}</AddressText>
+          {textToCopy && <ClipboardButton textToCopy={textToCopy} />}
+        </AddressDetails>
+      </NamedAddress>
+    )
+  }
 
   return (
     <div style={{ fontSize, maxWidth, wordBreak: middleEllipsis ? 'initial' : 'break-all' }} className={className}>
@@ -55,4 +69,36 @@ const GroupPart = styled.span`
 
 const ButtonWrapper = styled.div`
   flex-shrink: 0;
+`
+
+const NamedAddress = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  min-width: 0;
+
+  ${HighlightedPart} {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+`
+
+const AddressDetails = styled.div`
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  color: ${({ theme }) => theme.font.secondary};
+  font-size: inherit;
+  font-weight: inherit;
+
+  ${ClipboardButton} {
+    flex-shrink: 0;
+  }
+`
+
+const AddressText = styled(HighlightedPart)`
+  min-width: 0;
+  overflow-wrap: anywhere;
 `

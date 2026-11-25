@@ -7,7 +7,7 @@
     "start": "turbo start:app",
     "start:app": "vite",
     "build": "tsc && vite build --outDir build",
-    "build:gh-pages": "pnpm run build -- --base=/explorer/",
+    "build:gh-pages": "tsc && vite build --mode github-pages",
     "ci:build": "turbo run build",
     "ci:build:gh-pages": "turbo run build:gh-pages",
     "init-docker": "node docker/init-server-data.js",

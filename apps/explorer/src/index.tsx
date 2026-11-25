@@ -16,7 +16,7 @@ import { isFlexGapSupported } from './utils/browserSupport'
 
 let browserIsOld = !isFlexGapSupported()
 
-export const isHostGhPages = import.meta.env.BASE_URL.includes('explorer')
+export const isHostGhPages = import.meta.env.MODE === 'github-pages' || import.meta.env.BASE_URL.includes('explorer')
 
 const Router = isHostGhPages ? HashRouter : BrowserRouter
 

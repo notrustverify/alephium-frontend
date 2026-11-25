@@ -5,6 +5,7 @@ import { RiExternalLinkLine } from 'react-icons/ri'
 import { Link, LinkProps } from 'react-router-dom'
 import styled, { css, useTheme } from 'styled-components'
 
+import { useAddressName } from '@/api/addresses/knownAddresses'
 import { useAssetsMetadata } from '@/api/assets/assetsHooks'
 import Amount from '@/components/Amount'
 import LockTimeIcon from '@/components/LockTimeIcon'
@@ -21,6 +22,7 @@ interface TightLinkProps extends SimpleLinkProps {
   maxWidth: string
   text: string
   isHash?: boolean
+  label?: string
 }
 
 export const SimpleLink = ({ children, newTab, ...props }: SimpleLinkProps) => (
@@ -29,15 +31,15 @@ export const SimpleLink = ({ children, newTab, ...props }: SimpleLinkProps) => (
   </StyledLink>
 )
 
-export const TightLink = ({ maxWidth, text, isHash, ...props }: TightLinkProps) => (
-  <div style={{ maxWidth: maxWidth, display: 'flex', overflow: 'hidden' }}>
+export const TightLink = ({ maxWidth, text, isHash, label, ...props }: TightLinkProps) => (
+  <div style={{ maxWidth: maxWidth, minWidth: 0, display: 'flex', overflow: 'hidden' }}>
     <StyledLink
       {...props}
       onClick={(e) => {
         e.stopPropagation()
       }}
     >
-      {isHash ? <HashEllipsed hash={text} /> : <Ellipsed text={text} />}
+      {isHash ? <HashEllipsed hash={text} label={label} /> : <Ellipsed text={text} />}
     </StyledLink>
   </div>
 )
@@ -62,6 +64,7 @@ const AddressLinkBase = ({
   className
 }: AddressLinkProps) => {
   const theme = useTheme()
+  const addressName = useAddressName(address)
   const isLocked = lockTime && lockTime > Date.now()
 
   const assetsMetadata = useAssetsMetadata(amounts?.map((x) => x.id))
@@ -82,7 +85,13 @@ const AddressLinkBase = ({
 
   return (
     <div className={className}>
-      <TightLink to={getAddressExplorerPagePath(address)} maxWidth={maxWidth} text={address} isHash />
+      <TightLink
+        to={getAddressExplorerPagePath(address)}
+        maxWidth={maxWidth}
+        text={address}
+        label={addressName}
+        isHash
+      />
       {txHashRef && (
         <TxLink to={`/transactions/${txHashRef}`} data-tooltip-id="default" data-tooltip-content={txHashRef}>
           <RiExternalLinkLine size={10} />
@@ -100,6 +109,7 @@ const AddressLinkBase = ({
 
 export const AddressLink = styled(AddressLinkBase)`
   display: flex;
+  min-width: 0;
 
   ${({ flex }) =>
     flex &&

@@ -8,27 +8,38 @@ import ClipboardButton from './Buttons/ClipboardButton'
 
 interface HashEllipsedProps extends HTMLAttributes<HTMLDivElement> {
   hash: string
+  label?: string
   copyTooltipText?: string
   disableCopy?: boolean
   className?: string
 }
 
-const HashEllipsed = ({ hash, copyTooltipText, disableCopy = false, className, ...props }: HashEllipsedProps) => {
+const HashEllipsed = ({
+  hash,
+  label,
+  copyTooltipText,
+  disableCopy = false,
+  className,
+  ...props
+}: HashEllipsedProps) => {
   const { t } = useTranslation()
 
   return (
-    <Container className={className}>
+    <Container className={className} title={label ? hash : undefined} $hasLabel={!!label}>
       <HashContainer>
-        <Ellipsed text={hash} {...props} />
+        {label ? (
+          <NamedHash data-tooltip-id="default" data-tooltip-content={`${label} · ${hash}`} {...props}>
+            <WalletName>{label}</WalletName>
+            <SecondaryHash>
+              {hash.slice(0, 6)}…{hash.slice(-6)}
+            </SecondaryHash>
+          </NamedHash>
+        ) : (
+          <Ellipsed text={hash} {...props} />
+        )}
       </HashContainer>
       {!disableCopy && (
-        <CopyButton
-          textToCopy={hash}
-          data-tooltip-id="default"
-          data-tooltip-content={copyTooltipText || t('Copy hash')}
-          className={className}
-          hasBackground
-        />
+        <CopyButton textToCopy={hash} tooltip={copyTooltipText || t('Copy hash')} className={className} hasBackground />
       )}
     </Container>
   )
@@ -44,15 +55,46 @@ const CopyButton = styled(ClipboardButton)`
 
 const HashContainer = styled.div`
   flex: 1;
+  min-width: 0;
   overflow: hidden;
 `
 
-const Container = styled.div`
+// If the address does not fit beside the name, it wraps out of this single-line viewport.
+// The full address remains available in the tooltip and the copy action.
+const NamedHash = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 8px;
+  line-height: 1.5;
+  max-height: 1.5em;
+  overflow: hidden;
+  align-items: baseline;
+`
+
+const WalletName = styled.span`
+  flex-shrink: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+`
+
+const SecondaryHash = styled.span`
+  flex-shrink: 0;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.85em;
+  color: ${({ theme }) => theme.font.secondary};
+`
+
+const Container = styled.div<{ $hasLabel: boolean }>`
   position: relative;
   display: flex;
+  min-width: 0;
   align-items: center;
   overflow: hidden;
-  font-family: 'Roboto Mono';
+  font-family: ${({ $hasLabel }) => ($hasLabel ? 'inherit' : "'Roboto Mono'")};
+  letter-spacing: ${({ $hasLabel }) => ($hasLabel ? 'normal' : 'inherit')};
   line-height: normal;
 
   &:hover {

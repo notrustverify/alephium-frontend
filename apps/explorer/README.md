@@ -12,6 +12,7 @@ A blockchain explorer frontend for Alephium.
   - Hash, status, block hash, timestamp, inputs, outputs, gas, TX fee
 - Address view
   - Address, number of transactions, total balance, locked balance, history
+  - Known mainnet wallet names from [address2name](https://github.com/sven-hash/address2name/blob/main/know-walletsv2.json)
 - Statistics
   - Hashrate, supply, transactions, blocks, number of chains
 
@@ -32,5 +33,27 @@ pnpm start
 ```
 
 ## Releasing
+
+### GitHub Pages
+
+1. In your GitHub repository, open **Settings → Pages** and select **GitHub Actions** as the deployment source.
+2. Open **Actions → Deploy explorer to GitHub Pages → Run workflow**.
+3. Open the site URL shown by the deployment when the workflow completes.
+
+The workflow builds only the explorer against the public mainnet services. It detects the Pages base path automatically
+and uses hash routing so address, transaction, and block links work when opened directly or refreshed.
+No AWS credentials are needed.
+
+Known wallet names are fetched in the browser and cached for one hour. Unlisted addresses and failed lookups display the
+original address. Links, clipboard actions, and transaction exports always use the original address. Names are only shown
+on mainnet.
+
+Names appear beside the full address in page headings and beside a shortened address in tables when space allows.
+Narrow table cells prioritize the name; the full address is available on hover and through the copy action.
+
+To build locally for Pages, set the backend variables from `.env.example` and run `pnpm run build:gh-pages`.
+The default base path is `/explorer/`; set `EXPLORER_BASE_PATH` to override it (for example, `/alephium-frontend/` or `/`).
+
+### Docker and AWS
 
 Follow the same [instructions as in the desktop wallet](../desktop-wallet/README.md). The only difference is that pushing a production tag will trigger the workflow to build and publish the Docker image. It will not deploy the explorer frontend to production. This is done by manually triggering the corresponding workflow from the GitHub interface.

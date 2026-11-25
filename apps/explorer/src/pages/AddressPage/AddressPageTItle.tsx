@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
+import { useAddressName } from '@/api/addresses/knownAddresses'
 import HighlightedHash from '@/components/HighlightedHash'
 import SectionTitle from '@/components/SectionTitle'
 import useIsContract from '@/pages/AddressPage/useIsContract'
@@ -11,11 +12,12 @@ interface AddressPageTitleProps {
 const AddressPageTitle = ({ addressStr }: AddressPageTitleProps) => {
   const { t } = useTranslation()
   const isContract = useIsContract(addressStr)
+  const addressName = useAddressName(addressStr)
 
   return (
     <SectionTitle
       title={isContract ? t('Contract') : t('Addresses_one')}
-      subtitle={<HighlightedHash text={addressStr} textToCopy={addressStr} />}
+      subtitle={<HighlightedHash text={addressStr} label={addressName} textToCopy={addressStr} />}
     />
   )
 }
