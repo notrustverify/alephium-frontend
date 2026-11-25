@@ -83,7 +83,10 @@ it('shows the original address and a contribution link when it is not in the reg
   expect(container.querySelector('a')?.textContent).toContain(address)
   expect(container.querySelector('h2')?.textContent).toContain(address)
   const contributionLink = container.querySelector(`a[href="${KNOWN_ADDRESSES_LIST_URL}"]`)
-  expect(contributionLink?.textContent).toBe('Add a name')
+  expect(contributionLink?.textContent).toBe('Recognize this address?')
+  expect(contributionLink?.getAttribute('data-tooltip-content')).toBe(
+    'Help others identify it by contributing a name on GitHub.'
+  )
   expect(contributionLink?.getAttribute('target')).toBe('_blank')
   expect(contributionLink?.getAttribute('rel')).toContain('noopener')
 })

@@ -53,7 +53,8 @@ on mainnet.
 
 Names appear beside the full address in page headings and beside a shortened address in tables when space allows.
 Narrow table cells prioritize the name; the full address is available on hover and through the copy action.
-Unnamed mainnet address pages include an **Add a name** link to the GitHub list, where visitors can propose additions.
+Unnamed mainnet address pages include a **Recognize this address?** link to the GitHub list, inviting visitors to
+contribute a name and help others identify the address.
 
 To build locally for Pages, set the backend variables from `.env.example` and run `pnpm run build:gh-pages`.
 The default base path is `/explorer/`; set `EXPLORER_BASE_PATH` to override it (for example, `/alephium-frontend/` or `/`).

@@ -24,8 +24,12 @@ const AddressPageTitle = ({ addressStr }: AddressPageTitleProps) => {
         <AddressIdentity>
           <HighlightedHash text={addressStr} label={addressName} textToCopy={addressStr} />
           {isUnnamed && (
-            <ContributionLink href={KNOWN_ADDRESSES_LIST_URL}>
-              {t('Add a name')}
+            <ContributionLink
+              href={KNOWN_ADDRESSES_LIST_URL}
+              data-tooltip-id="default"
+              data-tooltip-content={t('Help others identify it by contributing a name on GitHub.')}
+            >
+              {t('Recognize this address?')}
               <RiExternalLinkLine aria-hidden />
             </ContributionLink>
           )}

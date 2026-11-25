@@ -1,6 +1,5 @@
 {
   "ALPH balance": "ALPH balance",
-  "Add a name": "Add a name",
   "Address group": "Address group",
   "Addresses_one": "Address",
   "Addresses_other": "Addresses",
@@ -28,6 +27,7 @@
   "Hashrate per": "Hashrate per",
   "Hash & Time": "Hash & Time",
   "Height": "Height",
+  "Help others identify it by contributing a name on GitHub.": "Help others identify it by contributing a name on GitHub.",
   "Hourly": "Hourly",
   "Incoming transfer": "Incoming transfer",
   "Inputs": "Inputs",
@@ -49,6 +49,7 @@
   "Outputs": "Outputs",
   "Pending": "Pending",
   "Previous": "Previous",
+  "Recognize this address?": "Recognize this address?",
   "Script execution failed": "Script execution failed",
   "Search for an address, a public key, or a tx...": "Search for an address, a public key, or a tx...",
   "Search": "Search",
