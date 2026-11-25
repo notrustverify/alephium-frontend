@@ -38,7 +38,13 @@ export const getAddressContributionUrl = ({ address, name, category, source }: A
     '',
     '```json',
     JSON.stringify(
-      { address: getAddressWithoutGroup(address.trim()), name: name.trim(), type: category.trim() },
+      {
+        address: getAddressWithoutGroup(address.trim()),
+        name: name.trim(),
+        type: category.trim(),
+        state: 'guessed',
+        exchangename: ''
+      },
       null,
       2
     ),

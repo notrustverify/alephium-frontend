@@ -13,11 +13,15 @@ it('prepares a review request with the name field, category and public source wi
   expect(url.searchParams.get('title')).toBe('Address name suggestion: My pool & friends 🐟')
   const body = url.searchParams.get('body') || ''
   const suggestedEntry = JSON.parse(body.split('```json\n')[1].split('\n```')[0])
-  expect(suggestedEntry).toEqual({ address: contribution.address, name: 'My pool & friends 🐟', type: 'Pool' })
+  expect(suggestedEntry).toEqual({
+    address: contribution.address,
+    name: 'My pool & friends 🐟',
+    type: 'Pool',
+    state: 'guessed',
+    exchangename: ''
+  })
   expect(body).toContain(contribution.source)
   expect(body).toContain('not proof of ownership')
-  expect(body).not.toContain('exchangename')
-  expect(body).not.toContain('"state"')
 })
 
 it('accepts valid trimmed contributions with an optional category', () => {
